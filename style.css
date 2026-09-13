@@ -87,22 +87,26 @@ button.active {
     background-color: #b58863;
 }
 
-/* CSS cho Quân Trắng: Ruột trắng, viền đen dày dặn */
 .piece-white {
     color: white;
     text-shadow: 
-        2px 2px 0 #000, 
-        -2px -2px 0 #000, 
-        2px -2px 0 #000, 
-        -2px 2px 0 #000,
-        0px 2px 0 #000,
-        0px -2px 0 #000,
-        2px 0px 0 #000,
-        -2px 0px 0 #000;
+        2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
+        0px 2px 0 #000, 0px -2px 0 #000, 2px 0px 0 #000, -2px 0px 0 #000;
 }
 
-/* CSS cho Quân Đen: Ruột đen, viền mờ màu sáng cho nổi bật */
 .piece-black {
     color: black;
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* === CODE MỚI THÊM Ở BƯỚC NÀY === */
+
+/* Khi bấm chọn quân cờ: Đổi nền ô thành màu Vàng */
+.selected {
+    background-color: #f1c40f !important; 
+}
+
+/* Các ô có thể đi tới: Thêm viền xanh lá cây chìm bên trong */
+.highlight {
+    box-shadow: inset 0 0 0 6px rgba(39, 174, 96, 0.8) !important; 
 }
