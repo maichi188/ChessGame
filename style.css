@@ -14,6 +14,46 @@ body {
     color: white;
 }
 
+.login-container {
+    background-color: #34495e;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.login-container input {
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.login-container button {
+    background-color: #27ae60;
+}
+
+.profile-card {
+    background-color: #1abc9c;
+    padding: 12px 15px;
+    border-radius: 6px;
+    font-size: 16px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap; 
+    gap: 5px;
+}
+
 .container {
     width: 100%;
     max-width: 500px;
@@ -27,6 +67,7 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 10px;
+    flex-wrap: wrap; 
 }
 
 button {
@@ -39,10 +80,53 @@ button {
     background-color: #95a5a6;
     color: white;
     font-weight: bold;
+    min-width: 110px; 
 }
 
 button.active {
     background-color: #27ae60;
+}
+
+button.btn-danger {
+    background-color: #e74c3c;
+}
+
+.eval-wrapper {
+    background-color: #34495e;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.eval-text {
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.eval-bar {
+    width: 100%;
+    height: 12px;
+    background-color: #f0d9b5; 
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #222;
+}
+
+.eval-fill {
+    height: 100%;
+    width: 50%; 
+    background-color: #b58863; 
+    transition: width 0.5s ease-in-out;
+}
+
+.move-quality {
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #bdc3c7;
 }
 
 .status {
@@ -79,19 +163,12 @@ button.active {
     font-weight: bold;
 }
 
-.light {
-    background-color: #f0d9b5;
-}
-
-.dark {
-    background-color: #b58863;
-}
+.light { background-color: #f0d9b5; }
+.dark { background-color: #b58863; }
 
 .piece-white {
     color: white;
-    text-shadow: 
-        2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
-        0px 2px 0 #000, 0px -2px 0 #000, 2px 0px 0 #000, -2px 0px 0 #000;
+    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0px 2px 0 #000, 0px -2px 0 #000, 2px 0px 0 #000, -2px 0px 0 #000;
 }
 
 .piece-black {
@@ -99,14 +176,5 @@ button.active {
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* === CODE MỚI THÊM Ở BƯỚC NÀY === */
-
-/* Khi bấm chọn quân cờ: Đổi nền ô thành màu Vàng */
-.selected {
-    background-color: #f1c40f !important; 
-}
-
-/* Các ô có thể đi tới: Thêm viền xanh lá cây chìm bên trong */
-.highlight {
-    box-shadow: inset 0 0 0 6px rgba(39, 174, 96, 0.8) !important; 
-}
+.selected { background-color: #f1c40f !important; }
+.highlight { box-shadow: inset 0 0 0 6px rgba(39, 174, 96, 0.8) !important; }

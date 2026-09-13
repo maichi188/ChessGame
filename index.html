@@ -4,27 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Game Cờ Vua</title>
-    <!-- Nhúng file giao diện CSS -->
     <link rel="stylesheet" href="style.css">
-    <!-- Nhúng thư viện chess.js (Bộ não xử lý luật pháp của trò chơi) qua mạng -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Nút chọn chế độ chơi -->
+    <div id="login-screen" class="login-container">
+        <h2>Đăng Nhập Cờ Vua</h2>
+        <p>Nhập tên để lưu trữ điểm số Elo của bạn</p>
+        <input type="text" id="username-input" placeholder="VD: Hiệp, shiyori29, peihcouq0209..." />
+        <button id="btn-login">Vào Chơi</button>
+    </div>
+
+    <div id="game-screen" class="container" style="display: none;">
+        
+        <div class="profile-card">
+            <div class="player-info">
+                <span>👤 <b id="display-name">Người chơi</b></span>
+                <!-- HIỂN THỊ TRỰC TIẾP TỈ LỆ LỖI CỦA BOT ĐỂ BẠN DỄ THEO DÕI -->
+                <span>🏆 Elo: <b id="display-elo">1000</b> | Lỗi Bot: <b id="display-bot-error">35.0</b>%</span>
+            </div>
+        </div>
+
         <div class="menu">
             <button id="btn-pvp" class="active">Chơi 2 Người (PvP)</button>
             <button id="btn-pve">Chơi với Máy (PvE)</button>
+            <button id="btn-new-game" class="btn-danger">Ván Mới</button>
         </div>
         
-        <!-- Hiển thị trạng thái ván đấu -->
+        <div class="eval-wrapper">
+            <div class="eval-text" id="eval-text">Thế trận cân bằng</div>
+            <div class="eval-bar">
+                <div id="eval-fill" class="eval-fill"></div>
+            </div>
+            <div class="move-quality" id="move-quality">Phán quyết: Mới bắt đầu</div>
+        </div>
+
         <div class="status" id="status-text">Lượt của Trắng</div>
-        
-        <!-- Khung chứa 64 ô cờ -->
         <div id="board" class="board"></div>
     </div>
 
-    <!-- Nhúng file logic JS ở cuối cùng -->
     <script src="script.js"></script>
 </body>
 </html>
