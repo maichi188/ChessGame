@@ -61,6 +61,8 @@ button.active {
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
+    /* Ép giới hạn khung để không bao giờ bị tràn */
+    max-width: 500px;
     /* Tỷ lệ 1:1 ép bàn cờ luôn phải LÀ HÌNH VUÔNG */
     aspect-ratio: 1 / 1;
     border: 4px solid #333;
@@ -73,10 +75,15 @@ button.active {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Chữ (quân cờ) tự to nhỏ theo màn hình */
-    font-size: clamp(30px, 10vw, 50px); 
+    width: 100%;
+    height: 100%;
+    /* Kích thước chữ an toàn hơn, không làm đẩy khung lưới */
+    font-size: clamp(25px, 8vw, 42px); 
+    line-height: 1;
     cursor: pointer;
     user-select: none; /* Tránh việc lỡ tay bôi đen chữ khi bấm */
+    color: black; /* Màu đen cố định cho mọi quân cờ vì quân trắng đã là nét rỗng */
+    font-weight: bold;
 }
 
 /* Màu ô cờ xen kẽ */
