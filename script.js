@@ -18,11 +18,43 @@ const statusElement = document.getElementById('status-text');
 const btnPvP = document.getElementById('btn-pvp');
 const btnPvE = document.getElementById('btn-pve');
 const btnNewGame = document.getElementById('btn-new-game');
+const btnUndo = document.getElementById('btn-undo'); // Gọi nút Undo
 
 const game = new Chess();
 const pieceSymbols = { 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
 
-// === 1. BỘ 3 TÍNH CÁCH VÀ ĐA BẢN ĐỒ NHIỆT ===
+// === MÁY TẠO ÂM THANH ẢO (VANG TIẾNG LÁCH CÁCH) ===
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
+
+function playSound(isCapture) {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    if (isCapture) {
+        // Tiếng Tách (Ăn quân) - Tần số cao, dứt khoát
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    } else {
+        // Tiếng Tíc (Đi quân) - Trầm ấm
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.08);
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    }
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
 const personalities = {
     'balanced': { 
         pieceValues: { 'p': 100, 'n': 320, 'b': 330, 'r': 500, 'q': 900, 'k': 20000 },
@@ -44,14 +76,12 @@ const personalities = {
     'aggressive': { 
         pieceValues: { 'p': 80,  'n': 350, 'b': 330, 'r': 500, 'q': 1000, 'k': 20000 },
         pst: {
-            // Bản đồ Tốt Hổ Báo: Thưởng điểm khổng lồ nếu dám đẩy Tốt sang sân đối phương
             'p': [ 
                 [0,  0,  0,  0,  0,  0,  0,  0], [70, 70, 70, 70, 70, 70, 70, 70],
                 [30, 40, 50, 60, 60, 50, 40, 30], [20, 30, 40, 50, 50, 40, 30, 20],
                 [10, 20, 30, 40, 40, 30, 20, 10], [0,   0,  0, 10, 10,  0,  0,  0],
                 [0,   0,  0,-10,-10,  0,  0,  0], [0,   0,  0,  0,  0,  0,  0,  0]
             ],
-            // Bản đồ Mã Hổ Báo: Phải lao lên hàng 4, 5, 6
             'n': [ 
                 [-50,-40,-30,-30,-30,-30,-40,-50], [-40,-20, 10, 20, 20, 10,-20,-40],
                 [-30, 10, 30, 40, 40, 30, 10,-30], [-30, 10, 30, 40, 40, 30, 10,-30],
@@ -63,14 +93,12 @@ const personalities = {
     'defensive': { 
         pieceValues: { 'p': 130, 'n': 300, 'b': 320, 'r': 550, 'q': 850, 'k': 20000 },
         pst: {
-            // Bản đồ Tốt Phòng Thủ: Khuyến khích đứng lì ở nhà tạo tường chắn
             'p': [ 
                 [0,  0,  0,  0,  0,  0,  0,  0], [30, 30, 30, 30, 30, 30, 30, 30],
                 [10, 10, 10, 10, 10, 10, 10, 10], [5,   5,  5,  5,  5,  5,  5,  5],
                 [5,   5, 10, 15, 15, 10,  5,  5], [10, 15, 20, 25, 25, 20, 15, 10],
                 [15, 20, 25, 30, 30, 25, 20, 15], [0,   0,  0,  0,  0,  0,  0,  0]
             ],
-            // Bản đồ Mã Phòng Thủ: Ưu tiên bay lượn ở nửa sân nhà để bảo vệ
             'n': [ 
                 [-50,-40,-30,-30,-30,-30,-40,-50], [-40,-20, -5, -5, -5, -5,-20,-40],
                 [-30, -5,  5, 10, 10,  5, -5,-30], [-30,  0, 15, 20, 20, 15,  0,-30],
@@ -81,7 +109,6 @@ const personalities = {
     }
 };
 
-// Các quân không thay đổi nhiều chiến thuật (Tượng, Xe, Hậu, Vua) dùng chung bản đồ này
 const pst_common = {
     'b': [ 
         [-20,-10,-10,-10,-10,-10,-10,-20], [-10,  5,  0,  0,  0,  0,  5,-10],
@@ -121,11 +148,8 @@ const pst_common = {
     ]
 };
 
+const pieceValues = personalities['balanced'].pieceValues; 
 let currentBotPersonality = 'balanced'; 
-
-let sourceSquare = null; 
-let validMoves = [];     
-let isPvE = false; 
 
 function getBotErrorRate(elo) {
     if (elo < 900) return 0.60 - (elo / 900) * 0.20;
@@ -152,6 +176,10 @@ btnLogin.addEventListener('click', () => {
         
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'flex';
+        
+        // Mở khóa AudioContext khi người chơi bấm nút đầu tiên (Quy định của trình duyệt)
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        
         resetGame(); 
     } else {
         alert("Vui lòng nhập tên của bạn nhé!");
@@ -166,7 +194,6 @@ function resetGame() {
     evalHistory = [];
     lastMoveSquares = [];
     
-    // TỰ ĐỘNG CHỌN NGẦM TÍNH CÁCH (Xổ số ẩn)
     const types = ['balanced', 'aggressive', 'defensive'];
     currentBotPersonality = types[Math.floor(Math.random() * types.length)];
     
@@ -180,6 +207,33 @@ function resetGame() {
 btnPvP.addEventListener('click', () => { isPvE = false; btnPvP.classList.add('active'); btnPvE.classList.remove('active'); resetGame(); });
 btnPvE.addEventListener('click', () => { isPvE = true; btnPvE.classList.add('active'); btnPvP.classList.remove('active'); resetGame(); });
 btnNewGame.addEventListener('click', () => { resetGame(); });
+
+// CƠ CHẾ NÚT XIN ĐI LẠI (UNDO)
+btnUndo.addEventListener('click', () => {
+    // Nếu chưa đi nước nào hoặc game đã kết thúc thì không cho lùi
+    if (game.history().length === 0 || game.game_over()) return;
+    
+    game.undo(); // Lùi 1 nước của người chơi (Hoặc của Bot nếu PvP)
+    
+    // Nếu đang đánh với Máy (Và đang tới lượt Máy), phải lùi thêm 1 nước của mình nữa
+    if (isPvE && game.turn() === 'b') {
+        game.undo(); 
+    }
+    
+    // Dọn dẹp dấu vết UI và xóa bớt Lịch sử chấm điểm
+    sourceSquare = null;
+    validMoves = [];
+    lastMoveSquares = [];
+    
+    evalHistory.pop();
+    if (isPvE) evalHistory.pop();
+
+    const moveQualityElement = document.getElementById('move-quality');
+    moveQualityElement.textContent = "Phán quyết: Đã hoàn tác (Undo)";
+    moveQualityElement.style.color = "#bdc3c7";
+    
+    renderBoard();
+});
 
 function renderBoard() {
     boardElement.innerHTML = ''; 
@@ -237,6 +291,7 @@ function handleSquareClick(squareId) {
             let moveObj = game.move({ from: sourceSquare, to: squareId, promotion: 'q' });
             
             if (moveObj) {
+                playSound(moveObj.captured != null); // PHÁT ÂM THANH ĂN QUÂN HOẶC ĐI BƯỚC
                 lastMoveSquares = [moveObj.from, moveObj.to]; 
                 assessMoveQuality(oldScore, turn);
                 sourceSquare = null;
@@ -263,13 +318,12 @@ function handleSquareClick(squareId) {
     }
 }
 
-// BỘ ĐẾM ĐIỂM: Áp dụng Đa Bản đồ
 function evaluateBoard(isForBot = false) {
     let totalScore = 0;
     let nonPawnMaterial = 0; 
     const board = game.board();
     
-    let pVals = isForBot ? personalities[currentBotPersonality].pieceValues : personalities['balanced'].pieceValues;
+    let pVals = isForBot ? personalities[currentBotPersonality].pieceValues : pieceValues;
     let activePST = isForBot ? personalities[currentBotPersonality].pst : personalities['balanced'].pst;
 
     for (let row = 0; row < 8; row++) {
@@ -290,13 +344,22 @@ function evaluateBoard(isForBot = false) {
                 let value = pVals[piece.type];
                 let pstRow = (piece.color === 'w') ? row : (7 - row);
                 
-                // Lấy bản đồ đặc chế hoặc bản đồ chung
                 let pstTable = activePST[piece.type] || pst_common[piece.type];
                 
                 if (isEndgame && piece.type === 'k') pstTable = pst_common['k_e'];
                 if (isEndgame && piece.type === 'p') pstTable = pst_common['p_e'];
 
                 let pstValue = pstTable[pstRow][col];
+                
+                if (isForBot) {
+                    if (currentBotPersonality === 'aggressive' && piece.type !== 'k') {
+                        if (piece.color === 'w' && row < 4) pstValue += 30; 
+                        if (piece.color === 'b' && row > 3) pstValue += 30;
+                    } else if (currentBotPersonality === 'defensive' && piece.type !== 'k') {
+                        if (piece.color === 'w' && row >= 5) pstValue += 20; 
+                        if (piece.color === 'b' && row <= 2) pstValue += 20;
+                    }
+                }
                 
                 if (piece.color === 'w') totalScore += (value + pstValue); 
                 else totalScore -= (value + pstValue); 
@@ -368,7 +431,7 @@ function assessMoveQuality(oldScore, moveColor) {
 }
 
 function orderMoves(moves, isForBot) {
-    let pVals = isForBot ? personalities[currentBotPersonality].pieceValues : personalities['balanced'].pieceValues;
+    let pVals = isForBot ? personalities[currentBotPersonality].pieceValues : pieceValues;
     return moves.sort((a, b) => {
         let scoreA = 0, scoreB = 0;
         if (a.captured) scoreA += 10 * pVals[a.captured] - pVals[a.piece];
@@ -443,7 +506,6 @@ function minimax(depth, alpha, beta, isMaximizingPlayer, isForBot = false) {
     }
 }
 
-// === TƯ DUY CẢM TÍNH (FUZZY LOGIC) - LỰA CHỌN GIỐNG CON NGƯỜI ===
 function makeBotMove() {
     const possibleMoves = game.moves({ verbose: true });
     if (possibleMoves.length === 0) return;
@@ -451,22 +513,18 @@ function makeBotMove() {
     let botErrorRate = getBotErrorRate(currentElo);
     let oldScore = evaluateBoard(false); 
 
-    if (Math.random() < botErrorRate) {
-        const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-        let moveObj = game.move(randomMove);
-        lastMoveSquares = [moveObj.from, moveObj.to]; 
-        assessMoveQuality(oldScore, 'b'); 
-        renderBoard();
-        return; 
+    let isBlunder = Math.random() < botErrorRate;
+    let SEARCH_DEPTH = isBlunder ? 1 : 3; 
+    
+    if (!isBlunder && currentElo < 900) {
+        SEARCH_DEPTH = 2; 
     }
 
-    const SEARCH_DEPTH = 3; 
-    let moves = orderMoves(possibleMoves, true); 
-    
-    let bestScore = 999999; // Mục tiêu của Đen là tìm điểm số Âm nhất
+    let bestScore = 999999; 
     let scoredMoves = [];
 
-    // Chấm điểm toàn bộ các nước có thể đi
+    let moves = orderMoves(possibleMoves, true); 
+
     for (let i = 0; i < moves.length; i++) {
         const move = moves[i];
         game.move(move);           
@@ -479,14 +537,15 @@ function makeBotMove() {
         }
     }
 
-    // Lọc ra danh sách các nước đi "Ngon ngang ngửa nhau" (Chênh lệch không quá 30 điểm)
-    let topMoves = scoredMoves.filter(m => m.score <= bestScore + 30);
-    
-    // Máy tính sẽ tung xúc xắc chọn ngẫu nhiên 1 trong các nước đi xuất sắc này
+    let margin = isBlunder ? 30 : 5; 
+    let topMoves = scoredMoves.filter(m => m.score <= bestScore + margin);
     let chosenMove = topMoves[Math.floor(Math.random() * topMoves.length)].move;
 
     let moveObj = game.move(chosenMove);
-    if(moveObj) lastMoveSquares = [moveObj.from, moveObj.to]; 
+    if(moveObj) {
+        playSound(moveObj.captured != null); // BOT KHI ĐI CŨNG PHÁT RA ÂM THANH
+        lastMoveSquares = [moveObj.from, moveObj.to]; 
+    }
     
     assessMoveQuality(oldScore, 'b'); 
     renderBoard();
