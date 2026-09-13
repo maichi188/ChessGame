@@ -10,13 +10,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Chiều cao bằng 100% màn hình */
+    min-height: 100vh;
     color: white;
 }
 
 .container {
     width: 100%;
-    max-width: 500px; /* PC không bị quá to, Mobile thì vừa khít */
+    max-width: 500px;
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -42,7 +42,7 @@ button {
 }
 
 button.active {
-    background-color: #27ae60; /* Màu xanh báo hiệu đang chọn */
+    background-color: #27ae60;
 }
 
 .status {
@@ -54,43 +54,55 @@ button.active {
     border-radius: 6px;
 }
 
-/* Khung Bàn cờ */
 .board {
     display: grid;
-    /* Chia 8 cột, 8 hàng đều nhau */
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
-    /* Ép giới hạn khung để không bao giờ bị tràn */
     max-width: 500px;
-    /* Tỷ lệ 1:1 ép bàn cờ luôn phải LÀ HÌNH VUÔNG */
     aspect-ratio: 1 / 1;
     border: 4px solid #333;
     border-radius: 6px;
     overflow: hidden;
 }
 
-/* Từng ô cờ */
 .square {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 100%;
-    /* Kích thước chữ an toàn hơn, không làm đẩy khung lưới */
     font-size: clamp(25px, 8vw, 42px); 
     line-height: 1;
     cursor: pointer;
-    user-select: none; /* Tránh việc lỡ tay bôi đen chữ khi bấm */
-    color: black; /* Màu đen cố định cho mọi quân cờ vì quân trắng đã là nét rỗng */
+    user-select: none;
     font-weight: bold;
 }
 
-/* Màu ô cờ xen kẽ */
 .light {
-    background-color: #f0d9b5; /* Trắng ngà */
+    background-color: #f0d9b5;
 }
 
 .dark {
-    background-color: #b58863; /* Nâu gỗ */
+    background-color: #b58863;
+}
+
+/* CSS cho Quân Trắng: Ruột trắng, viền đen dày dặn */
+.piece-white {
+    color: white;
+    text-shadow: 
+        2px 2px 0 #000, 
+        -2px -2px 0 #000, 
+        2px -2px 0 #000, 
+        -2px 2px 0 #000,
+        0px 2px 0 #000,
+        0px -2px 0 #000,
+        2px 0px 0 #000,
+        -2px 0px 0 #000;
+}
+
+/* CSS cho Quân Đen: Ruột đen, viền mờ màu sáng cho nổi bật */
+.piece-black {
+    color: black;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
 }
