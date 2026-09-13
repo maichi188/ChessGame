@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Game Cờ Vua</title>
+    <!-- Nhúng file giao diện CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Nhúng thư viện chess.js (Bộ não xử lý luật pháp của trò chơi) qua mạng -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Nút chọn chế độ chơi -->
+        <div class="menu">
+            <button id="btn-pvp" class="active">Chơi 2 Người (PvP)</button>
+            <button id="btn-pve">Chơi với Máy (PvE)</button>
+        </div>
+        
+        <!-- Hiển thị trạng thái ván đấu -->
+        <div class="status" id="status-text">Lượt của Trắng</div>
+        
+        <!-- Khung chứa 64 ô cờ -->
+        <div id="board" class="board"></div>
+    </div>
+
+    <!-- Nhúng file logic JS ở cuối cùng -->
+    <script src="script.js"></script>
+</body>
+</html>
